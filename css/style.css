@@ -187,3 +187,65 @@
 .swiper-pagination.img-pagination .img-pagination-item.swiper-pagination-bullet-active {
     background-color: none
 }
+
+/* Desktop-only tweaks to make the left image cover the left column for section b7db1e6 */
+@media (min-width: 992px) {
+
+    /* ensure container rows behave as two equal-height columns */
+    .elementor-element-b7db1e6 .elementor-row {
+        display: flex;
+    }
+
+    .elementor-element-b7db1e6 .elementor-column {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .elementor-element-b7db1e6 .elementor-column .elementor-column-wrap {
+        flex: 1;
+        display: flex;
+        align-items: stretch;
+    }
+
+    /* make the image fill and cover */
+    .elementor-element-b7db1e6 .elementor-image img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        display: block !important;
+    }
+}
+
+/* Custom flexbox for services items - desktop only (min-width: 768px) */
+@media (min-width: 768px) {
+    #jet-menu-item-5555 .services-listing.cherry-services-row {
+        display: flex !important;
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+        gap: 15px !important;
+    }
+
+    /* 2 items - each takes 50% */
+    #jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(1):nth-last-child(2),
+    #jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(2):nth-last-child(1) {
+        flex: 0 0 calc(50% - 7.5px) !important;
+        max-width: calc(50% - 7.5px) !important;
+    }
+
+    /* 3 items - each takes 33.333% */
+    #jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(1):nth-last-child(3),
+    #jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(2):nth-last-child(2),
+    #jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(3):nth-last-child(1) {
+        flex: 0 0 calc(33.333% - 10px) !important;
+        max-width: calc(33.333% - 10px) !important;
+    }
+
+    /* 4 items - each takes 25% */
+    #jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(1):nth-last-child(4),
+    #jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(2):nth-last-child(3),
+    #jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(3):nth-last-child(2),
+    #jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(4):nth-last-child(1) {
+        flex: 0 0 calc(25% - 11.25px) !important;
+        max-width: calc(25% - 11.25px) !important;
+    }
+}

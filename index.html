@@ -30,6 +30,40 @@
 				display: block !important;
 			}
 		}
+
+		/* Custom flexbox for services items - desktop only (min-width: 768px) */
+		@media (min-width: 768px) {
+			#jet-menu-item-5555 .services-listing.cherry-services-row {
+				display: flex !important;
+				justify-content: center !important;
+				flex-wrap: wrap !important;
+				gap: 15px !important;
+			}
+
+			/* 2 items - each takes 50% */
+			#jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(1):nth-last-child(2),
+			#jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(2):nth-last-child(1) {
+				flex: 0 0 calc(50% - 7.5px) !important;
+				max-width: calc(50% - 7.5px) !important;
+			}
+
+			/* 3 items - each takes 33.333% */
+			#jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(1):nth-last-child(3),
+			#jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(2):nth-last-child(2),
+			#jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(3):nth-last-child(1) {
+				flex: 0 0 calc(33.333% - 10px) !important;
+				max-width: calc(33.333% - 10px) !important;
+			}
+
+			/* 4 items - each takes 25% */
+			#jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(1):nth-last-child(4),
+			#jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(2):nth-last-child(3),
+			#jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(3):nth-last-child(2),
+			#jet-menu-item-5555 .services-listing.cherry-services-row > .services-item:nth-child(4):nth-last-child(1) {
+				flex: 0 0 calc(25% - 11.25px) !important;
+				max-width: calc(25% - 11.25px) !important;
+			}
+		}
 	</style>
 	<meta charset="UTF-8">
 	<link rel="profile" href="https://gmpg.org/xfn/11">
@@ -4040,7 +4074,7 @@
 
 		.template-boxed .services-item__thumbnail__link:before,
 		.template-boxed-2 .services-item__thumbnail__link:before {
-			background-color: #fec303;
+			background-color: ;
 		}
 
 		.tm-testi blockquote {
@@ -6444,6 +6478,206 @@
 													<div class="jet-menu-title">Liên hệ</div>
 												</div>
 											</a>
+										</li>
+										
+										<li id="jet-menu-item-5555"
+											class="jet-menu-item jet-menu-item-type-post_type jet-menu-item-object-page jet-menu-item-has-children jet-mega-menu-item jet-regular-item jet-menu-item-has-children jet-menu-item-5533">
+											<a href="" class="top-level-link">
+												<div class="jet-menu-item-wrapper">
+													<div class="jet-menu-title">Chi nhánh</div><i
+														class="jet-dropdown-arrow fa fa-angle-down"></i>
+												</div>
+											</a>
+											<div class="jet-sub-mega-menu">
+												<div class="elementor elementor-6963">
+													<div class="elementor-inner">
+														<div class="elementor-section-wrap">
+															<section data-id="909370f"
+																class="elementor-element elementor-element-909370f elementor-section-boxed elementor-section-height-default elementor-section-height-default elementor-section elementor-top-section"
+																data-element_type="section">
+																<div
+																	class="elementor-container elementor-column-gap-default">
+																	<div class="elementor-row">
+																		<div data-id="afeb1cb"
+																			class="elementor-element elementor-element-afeb1cb elementor-column elementor-col-100 elementor-top-column"
+																			data-element_type="column">
+																			<div
+																				class="elementor-column-wrap elementor-element-populated">
+																				<div class="elementor-widget-wrap">
+																					<div data-id="b0b10ec"
+																						class="elementor-element elementor-element-b0b10ec elementor-widget elementor-widget-cherry_services"
+																						data-element_type="cherry_services.default">
+																						<div
+																							class="elementor-widget-container">
+																							<div class="elementor-">
+																								<div
+																									class="services-container">
+																									<div class="cherry-services services-wrap template-boxed"
+																										data-atts="{"
+																										limit":4,"orderby":"date","order":"desc","category":"","id":"","more":false,"more_text":"more","more_url":"#","ajax_more":false,"show_title":true,"show_media":true,"show_content":true,"show_item_more":true,"item_more_text":"","show_filters":false,"use_space":true,"use_rows_space":true,"size":"thumbnail","echo":false,"title":"","excerpt_length":"16","wrap_class":"services-wrap","col_xs":1,"col_sm":4,"col_md":4,"col_xl":4,"before_title":"<h2="">
+
+																										<div class="\"
+																											services-listing"
+																											cherry-services-row\"="">
+
+																											<div
+																												class="services-listing cherry-services-row">
+																												<div id="services-6309"
+																													class=" services-item item-1 clearfix odd col-xs-12 col-sm-3 col-md-3 col-xl-3">
+																													<div
+																														class="services-item__thumbnail">
+																														<a href="index.html"
+																															class="services-item__thumbnail__link">
+																															<div
+																																class="image_wrap">
+																																<div
+																																	class="services-macros">
+																																	<img width="295"
+																																		height="222"
+																																		src="images/LUM00468-HDR.jpg"
+																																		class="avatar wp-post-image"
+																																		alt="Fitness"
+																																		srcset="images/LUM00468-HDR.jpg 295w, images/LUM00468-HDR.jpg 418w, images/LUM00468-HDR.jpg 1200w, images/LUM00468-HDR.jpg 400w, images/LUM00468-HDR.jpg 900w"
+																																		sizes="(max-width: 295px) 100vw, 295px">
+																																</div>
+																															</div>
+																															<div
+																																class="title_wrap">
+																																<div
+																																	class="services-macros">
+																																	Trần Quốc Nghiễn
+																																</div>
+																															</div>
+																														</a>
+																													</div>
+																													
+																												</div>
+																												<!--/.services-item-->
+																												<div id="services-6312"
+																													class=" services-item item-2 clearfix even col-xs-12 col-sm-3 col-md-3 col-xl-3">
+																													<div
+																														class="services-item__thumbnail">
+																														<a href=""
+																															class="services-item__thumbnail__link">
+																															<div
+																																class="image_wrap">
+																																<div
+																																	class="services-macros">
+																																	<img width="295"
+																																		height="222"
+																																		src="images/LUM00633-HDR.jpg"
+																																		class="avatar wp-post-image"
+																																		alt="GYM"
+																																		srcset="images/LUM00633-HDR.jpg 295w, images/LUM00633-HDR.jpg 418w, images/LUM00633-HDR.jpg 1200w, images/LUM00633-HDR.jpg 400w, images/LUM00633-HDR.jpg 900w"
+																																		sizes="(max-width: 295px) 100vw, 295px">
+																																</div>
+																															</div>
+																															<div
+																																class="title_wrap">
+																																<div
+																																	class="services-macros">
+																																	Coming soon
+																																</div>
+																															</div>
+																														</a>
+																													</div>
+																													
+																												</div>
+																												<!--/.services-item-->
+																												<!-- <div id="services-6314"
+																													class=" services-item item-3 clearfix odd col-xs-12" style="flex: 0 0 calc(33.333% - 10px); max-width: calc(33.333% - 10px);">
+																													<div
+																														class="services-item__thumbnail">
+																														<a href="services-2.html"
+																															class="services-item__thumbnail__link">
+																															<div
+																																class="image_wrap">
+																																<div
+																																	class="services-macros">
+																																	<img width="295"
+																																		height="222"
+																																		src="images/LUM01442.jpg"
+																																		class="avatar wp-post-image"
+																																		alt="Fitness"
+																																		srcset="images/LUM01442.jpg 295w, images/LUM01442.jpg 418w, images/LUM01442.jpg 1200w, images/LUM01442.jpg 400w, images/LUM01442.jpg 900w"
+																																		sizes="(max-width: 295px) 100vw, 295px">
+																																</div>
+																															</div>
+																															<div
+																																class="title_wrap">
+																																<div
+																																	class="services-macros">
+																																	Sport
+																																	Conditioning
+																																</div>
+																															</div>
+																														</a>
+																													</div>
+																													<div
+																														class="services-item__content">
+																														
+																														<a href="services-2.html"
+																															class="btn btn-primary">Đọc
+																															thêm</a>
+																													</div>
+																												</div> -->
+																												<!--/.services-item-->
+																												<!-- <div id="services-6316"
+																													class=" services-item item-4 clearfix even col-xs-12 col-sm-3 col-md-3 col-xl-3">
+																													<div
+																														class="services-item__thumbnail">
+																														<a href="services-6.html"
+																															class="services-item__thumbnail__link">
+																															<div
+																																class="image_wrap">
+																																<div
+																																	class="services-macros">
+																																	<img width="295"
+																																		height="222"
+																																		src="images/LUM01522.jpg"
+																																		class="avatar wp-post-image"
+																																		alt="Powerlifting"
+																																		srcset="images/LUM01522.jpg 295w, images/LUM01522.jpg 418w, images/LUM01522.jpg 1200w, images/LUM01522.jpg 400w, images/LUM01522.jpg 900w"
+																																		sizes="(max-width: 295px) 100vw, 295px">
+																																</div>
+																															</div>
+																															<div
+																																class="title_wrap">
+																																<div
+																																	class="services-macros">
+																																	Pilates
+																																	Mat
+																																</div>
+																															</div>
+																														</a>
+																													</div>
+																													<div
+																														class="services-item__content">
+																														
+																														<a href="services-6.html"
+																															class="btn btn-primary">Đọc
+																															thêm</a>
+
+																													</div>
+																												</div> -->
+																												<!--/.services-item-->
+																											</div>
+																										</div>
+																									</div>
+																								</div>
+																							</div>
+																						</div>
+																					</div>
+																				</div>
+																			</div>
+																		</div>
+																	</div>
+																</div>
+															</section>
+														</div>
+													</div>
+												</div>
+											</div>
 										</li>
 									
 									</ul>
