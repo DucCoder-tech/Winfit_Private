@@ -170,6 +170,9 @@
 	<link rel="dns-prefetch" href="//unpkg.com">
 	<link rel="dns-prefetch" href="//fonts.googleapis.com">
 	<link rel="dns-prefetch" href="//s.w.org">
+	<!-- Preload critical images for faster above-the-fold rendering -->
+	<link rel="preload" as="image" href="images/logo.png" fetchpriority="high">
+	<link rel="preload" as="image" href="images/section-bg.jpg" fetchpriority="high">
 	<link rel="alternate" type="application/rss+xml" title="FitSpot � Feed"
 		href="https://ld-wp.template-help.com/rockthemes/18753_v1/feed/">
 	<link rel="alternate" type="application/rss+xml" title="FitSpot � Comments Feed"
@@ -5052,7 +5055,7 @@
 					<div class="header-container__flex">
 						<div class="site-branding">
 							<div class="site-logo site-logo--image"><a class="site-logo__link" href="index.html"
-									rel="home"><img src="images/logo.png" alt="FitSpot" class="site-link__img"></a>
+									rel="home"><img src="images/logo.png" alt="FitSpot" class="site-link__img" fetchpriority="high" decoding="async"></a>
 							</div>
 							<div class="site-description">PRIVATE TRAINING</div>
 						</div>

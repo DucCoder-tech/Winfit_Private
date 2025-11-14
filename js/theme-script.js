@@ -319,6 +319,7 @@
 			this.ofi_init(this);
 			this.replyLinkScroll(this);
 			this.subscribe_init(this);
+			this.lazy_load_images_init(this);
 		},
 
 		window_load_render: function() {
@@ -880,9 +881,35 @@
 		page_preloader_init: function(self) {
 
 			if ($('.page-preloader-cover')[0]) {
-				$('.page-preloader-cover').delay(500).fadeTo(500, 0, function() {
-					$(this).remove();
-				});
+				var $preloader = $('.page-preloader-cover');
+				var preloaderTimeout;
+				var maxWaitTime = 2000; // Maximum 2 seconds wait time (reduced from 3s)
+				var minWaitTime = 300; // Minimum wait time for smooth transition (reduced from 800ms)
+				var startTime = Date.now();
+				
+				// Function to hide preloader
+				function hidePreloader() {
+					var elapsed = Date.now() - startTime;
+					var remainingWait = Math.max(0, minWaitTime - elapsed);
+					
+					$preloader.delay(remainingWait).fadeTo(300, 0, function() {
+						$(this).remove();
+					});
+					
+					if (preloaderTimeout) {
+						clearTimeout(preloaderTimeout);
+					}
+				}
+				
+				// Hide preloader when DOM is ready (don't wait for all images)
+				if (document.readyState === 'complete' || document.readyState === 'interactive') {
+					hidePreloader();
+				} else {
+					$(document).on('DOMContentLoaded', hidePreloader);
+				}
+				
+				// Fallback: Force hide after max wait time
+				preloaderTimeout = setTimeout(hidePreloader, maxWaitTime);
 			}
 		},
 
@@ -1310,6 +1337,64 @@
 					}, 3000);
 				}
 			})
+		},
+
+		lazy_load_images_init: function(self) {
+			// Add lazy loading to images below the fold (not in viewport initially)
+			// Skip images that already have fetchpriority="high" or are in header/above fold
+			if ('loading' in HTMLImageElement.prototype) {
+				// Browser supports native lazy loading
+				$('img').each(function() {
+					var $img = $(this);
+					// Skip if already has loading attribute or fetchpriority="high"
+					if (!$img.attr('loading') && !$img.attr('fetchpriority')) {
+					// Check if image is likely above the fold
+					var isAboveFold = false;
+					var offset = $img.offset();
+					if (offset && offset.top < window.innerHeight * 2) {
+						isAboveFold = true;
+					}
+						
+						// Add lazy loading only to images below the fold
+						if (!isAboveFold) {
+							$img.attr('loading', 'lazy');
+						}
+					}
+				});
+			} else {
+				// Fallback for browsers that don't support native lazy loading
+				// Use Intersection Observer API
+				if ('IntersectionObserver' in window) {
+					var imageObserver = new IntersectionObserver(function(entries, observer) {
+						entries.forEach(function(entry) {
+							if (entry.isIntersecting) {
+								var img = entry.target;
+								if (img.dataset.src) {
+									img.src = img.dataset.src;
+									img.removeAttribute('data-src');
+								}
+								imageObserver.unobserve(img);
+							}
+						});
+					});
+
+					$('img').each(function() {
+						var $img = $(this);
+						if (!$img.attr('fetchpriority') && !$img.attr('loading')) {
+							var offset = $img.offset();
+							if (offset && offset.top > window.innerHeight * 2) {
+								// Image is below fold, prepare for lazy loading
+								var src = $img.attr('src');
+								if (src) {
+									$img.attr('data-src', src);
+									$img.attr('src', 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1 1\'%3E%3C/svg%3E');
+									imageObserver.observe(this);
+								}
+							}
+						}
+					});
+				}
+			}
 		},
 	};
 	CherryJsCore.theme_script.init();
