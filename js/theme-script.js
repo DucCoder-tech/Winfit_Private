@@ -883,16 +883,110 @@
 			if ($('.page-preloader-cover')[0]) {
 				var $preloader = $('.page-preloader-cover');
 				var preloaderTimeout;
-				var maxWaitTime = 2000; // Maximum 2 seconds wait time (reduced from 3s)
-				var minWaitTime = 300; // Minimum wait time for smooth transition (reduced from 800ms)
+				var minDisplayTime = 3000; // Minimum 3 seconds display time
+				var maxWaitTime = 8000; // Maximum 8 seconds wait time (fallback)
 				var startTime = Date.now();
+				var imagesLoaded = false;
+				var domReady = false;
+				var hideCalled = false;
+				
+				// Function to check if all images are loaded
+				function checkAllImagesLoaded() {
+					// Get all images, but prioritize above-the-fold images
+					var allImages = $('img');
+					var images = allImages.filter(function() {
+						var $img = $(this);
+						// Include images that are not lazy loaded or are above the fold
+						var isLazy = $img.attr('loading') === 'lazy' || $img.attr('data-src');
+						var offset = $img.offset();
+						var isAboveFold = offset && offset.top < window.innerHeight * 2;
+						
+						// Include if not lazy or if above fold
+						return !isLazy || isAboveFold;
+					});
+					
+					// If no images to check, consider loaded
+					if (images.length === 0 && allImages.length === 0) {
+						imagesLoaded = true;
+						tryHidePreloader();
+						return;
+					}
+					
+					// If all images are lazy and below fold, just wait minimum time
+					if (images.length === 0 && allImages.length > 0) {
+						// Still wait for minimum time, but don't wait for images
+						setTimeout(function() {
+							imagesLoaded = true;
+							tryHidePreloader();
+						}, minDisplayTime);
+						return;
+					}
+					
+					var totalImages = images.length;
+					var loadedImages = 0;
+					var failedImages = 0;
+					var checkComplete = false;
+					
+					images.each(function() {
+						var img = this;
+						
+						// Check if image is already loaded
+						if (img.complete && img.naturalHeight !== 0) {
+							loadedImages++;
+						} else if (img.complete && img.naturalHeight === 0) {
+							// Image failed to load
+							failedImages++;
+						} else {
+							// Wait for image to load
+							var imageHandler = function() {
+								if (!checkComplete) {
+									loadedImages++;
+									if (loadedImages + failedImages >= totalImages) {
+										checkComplete = true;
+										imagesLoaded = true;
+										tryHidePreloader();
+									}
+								}
+								$(img).off('load error', imageHandler);
+							};
+							$(img).on('load error', imageHandler);
+						}
+					});
+					
+					// If all images are already loaded or failed
+					if (loadedImages + failedImages >= totalImages && !checkComplete) {
+						checkComplete = true;
+						imagesLoaded = true;
+						tryHidePreloader();
+					}
+				}
+				
+				// Function to try hiding preloader (only if conditions are met)
+				function tryHidePreloader() {
+					if (hideCalled) return;
+					
+					var elapsed = Date.now() - startTime;
+					var remainingTime = Math.max(0, minDisplayTime - elapsed);
+					
+					// Only hide if DOM is ready, images are loaded, and minimum time has passed
+					if (domReady && imagesLoaded && elapsed >= minDisplayTime) {
+						hidePreloader();
+					} else if (domReady && imagesLoaded) {
+						// Wait for remaining time
+						setTimeout(function() {
+							if (!hideCalled) {
+								hidePreloader();
+							}
+						}, remainingTime);
+					}
+				}
 				
 				// Function to hide preloader
 				function hidePreloader() {
-					var elapsed = Date.now() - startTime;
-					var remainingWait = Math.max(0, minWaitTime - elapsed);
+					if (hideCalled) return;
+					hideCalled = true;
 					
-					$preloader.delay(remainingWait).fadeTo(300, 0, function() {
+					$preloader.fadeTo(400, 0, function() {
 						$(this).remove();
 					});
 					
@@ -901,15 +995,36 @@
 					}
 				}
 				
-				// Hide preloader when DOM is ready (don't wait for all images)
+				// Wait for DOM to be ready
 				if (document.readyState === 'complete' || document.readyState === 'interactive') {
-					hidePreloader();
+					domReady = true;
+					// Small delay to ensure DOM is fully rendered
+					setTimeout(function() {
+						checkAllImagesLoaded();
+					}, 100);
 				} else {
-					$(document).on('DOMContentLoaded', hidePreloader);
+					$(document).on('DOMContentLoaded', function() {
+						domReady = true;
+						setTimeout(function() {
+							checkAllImagesLoaded();
+						}, 100);
+					});
 				}
 				
-				// Fallback: Force hide after max wait time
-				preloaderTimeout = setTimeout(hidePreloader, maxWaitTime);
+				// Also check on window load (fallback)
+				$(window).on('load', function() {
+					domReady = true;
+					checkAllImagesLoaded();
+				});
+				
+				// Fallback: Force hide after max wait time (even if images not loaded)
+				preloaderTimeout = setTimeout(function() {
+					if (!hideCalled) {
+						domReady = true;
+						imagesLoaded = true; // Force proceed
+						hidePreloader();
+					}
+				}, maxWaitTime);
 			}
 		},
 
