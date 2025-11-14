@@ -319,8 +319,6 @@
 			this.ofi_init(this);
 			this.replyLinkScroll(this);
 			this.subscribe_init(this);
-			// Start hiding preloader as soon as DOM is ready (faster than waiting for window.onload)
-			this.page_preloader_init(this);
 		},
 
 		window_load_render: function() {
@@ -880,23 +878,11 @@
 		},
 
 		page_preloader_init: function(self) {
-			if ($('.page-preloader-cover')[0] && !$('.page-preloader-cover').data('hiding')) {
-				// Mark as hiding to prevent double execution
-				$('.page-preloader-cover').data('hiding', true);
-				
-				// Reduced delay and fade time for faster loading experience
-				// Minimum 200ms display time to prevent flashing, then quick fade
-				var $preloader = $('.page-preloader-cover');
-				var startTime = Date.now();
-				var minDisplayTime = 200;
-				
-				setTimeout(function() {
-					var elapsed = Date.now() - startTime;
-					var remainingDelay = Math.max(0, minDisplayTime - elapsed);
-					$preloader.delay(remainingDelay).fadeTo(200, 0, function() {
-						$(this).remove();
-					});
-				}, 0);
+
+			if ($('.page-preloader-cover')[0]) {
+				$('.page-preloader-cover').delay(500).fadeTo(500, 0, function() {
+					$(this).remove();
+				});
 			}
 		},
 
