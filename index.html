@@ -171,42 +171,6 @@
 	<link rel="dns-prefetch" href="//fonts.googleapis.com">
 	<link rel="dns-prefetch" href="//s.w.org">
 	
-	<!-- Critical CSS for header - prevents FOUC and layout shift -->
-	<style>
-		/* Header critical styles - ensures proper display before main CSS loads */
-		header.site-header {
-			background-color: #191a1f;
-			background-image: url(images/header_bg.jpg);
-			background-repeat: no-repeat;
-			background-position: center top;
-			background-size: cover;
-			min-height: 120px;
-			position: relative;
-			z-index: 100;
-		}
-		.header-container {
-			background-color: #191a1f;
-			min-height: 80px;
-		}
-		.top-panel {
-			background-color: rgba(25, 26, 31, 0.1);
-			min-height: 50px;
-		}
-		.site-logo img {
-			max-height: 60px;
-			width: auto;
-			display: block;
-		}
-		.site-description {
-			color: #ffffff;
-			font-size: 14px;
-			margin-top: 5px;
-		}
-		.contact-block__text {
-			color: #ffffff;
-		}
-	</style>
-	
 	<!-- Preload critical CSS for faster rendering -->
 	<link rel="preload" as="style" href="css/style_2.css">
 	<link rel="preload" as="style" href="css/frontend.min.css">
