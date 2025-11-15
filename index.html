@@ -170,9 +170,26 @@
 	<link rel="dns-prefetch" href="//unpkg.com">
 	<link rel="dns-prefetch" href="//fonts.googleapis.com">
 	<link rel="dns-prefetch" href="//s.w.org">
+	
+	<!-- Preload critical CSS for faster rendering -->
+	<link rel="preload" as="style" href="css/style_2.css">
+	<link rel="preload" as="style" href="css/frontend.min.css">
+	<link rel="preload" as="style" href="css/public.css">
+	
+	<!-- Preload critical JavaScript -->
+	<link rel="preload" as="script" href="js/jquery.js">
+	<link rel="preload" as="script" href="js/theme-script.js">
+	
 	<!-- Preload critical images for faster above-the-fold rendering -->
 	<link rel="preload" as="image" href="images/logo.png" fetchpriority="high">
 	<link rel="preload" as="image" href="images/section-bg.jpg" fetchpriority="high">
+	<link rel="preload" as="image" href="images/header_bg.jpg" fetchpriority="high">
+	<link rel="preload" as="image" href="images/Depositphotos_20949963_original-e1532421316449-1.jpg" fetchpriority="high">
+	<link rel="preload" as="image" href="images/andy-watkins-317614-unsplash-e1532421338419.jpg" fetchpriority="high">
+	<link rel="preload" as="image" href="images/LUM00468-HDR.jpg">
+	
+	<!-- Preload Google Fonts -->
+	<link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Montserrat%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic&ver=4.9.8">
 	<link rel="alternate" type="application/rss+xml" title="FitSpot � Feed"
 		href="https://ld-wp.template-help.com/rockthemes/18753_v1/feed/">
 	<link rel="alternate" type="application/rss+xml" title="FitSpot � Comments Feed"
