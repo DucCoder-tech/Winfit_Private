@@ -883,87 +883,234 @@
 			if ($('.page-preloader-cover')[0]) {
 				var $preloader = $('.page-preloader-cover');
 				var preloaderTimeout;
-				var minDisplayTime = 1000; // Minimum 1 second display time (optimized from 3s)
-				var maxWaitTime = 4000; // Maximum 4 seconds wait time (fallback, optimized from 8s)
+				var minDisplayTime = 300; // Minimum 300ms display time (reduced for faster UX)
+				var maxWaitTime = 2000; // Maximum 2 seconds wait time (as requested)
 				var startTime = Date.now();
 				var imagesLoaded = false;
 				var domReady = false;
 				var hideCalled = false;
+				var imageUrls = new Set(); // Use Set to avoid duplicates
 				
-				// Function to check if all images are loaded
-				function checkAllImagesLoaded() {
-					// Get all images, but prioritize above-the-fold images only
-					var allImages = $('img');
-					var viewportHeight = window.innerHeight;
-					var images = allImages.filter(function() {
-						var $img = $(this);
-						// Include images that are not lazy loaded or are above the fold (first viewport only)
-						var isLazy = $img.attr('loading') === 'lazy' || $img.attr('data-src');
-						var offset = $img.offset();
-						// Only check images in first viewport (optimized from 2x viewport)
-						var isAboveFold = offset && offset.top < viewportHeight;
-						
-						// Include if not lazy or if above fold
-						return !isLazy || isAboveFold;
+				// Function to extract image URLs from srcset
+				function extractSrcsetUrls(srcset) {
+					if (!srcset) return [];
+					var urls = [];
+					var parts = srcset.split(',');
+					for (var i = 0; i < parts.length; i++) {
+						var url = parts[i].trim().split(/\s+/)[0];
+						if (url) urls.push(url);
+					}
+					return urls;
+				}
+				
+				// Function to normalize URL (handle relative URLs for GitHub Pages)
+				function normalizeUrl(url) {
+					if (!url || url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) {
+						return url;
+					}
+					
+					// Handle relative URLs
+					if (url.charAt(0) === '/') {
+						// Absolute path from root
+						return window.location.origin + url;
+					} else {
+						// Relative path
+						var base = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+						try {
+							return new URL(url, base).href;
+						} catch (e) {
+							return base + url;
+						}
+					}
+				}
+				
+				// Function to extract background image URLs from CSS
+				function extractBackgroundImages() {
+					var bgImages = [];
+					// Get all stylesheets
+					for (var i = 0; i < document.styleSheets.length; i++) {
+						try {
+							var sheet = document.styleSheets[i];
+							if (!sheet.cssRules) continue;
+							for (var j = 0; j < sheet.cssRules.length; j++) {
+								var rule = sheet.cssRules[j];
+								if (rule.style && rule.style.backgroundImage) {
+									var bg = rule.style.backgroundImage;
+									var match = bg.match(/url\(['"]?([^'")]+)['"]?\)/);
+									if (match && match[1]) {
+									var url = match[1];
+									// Normalize URL
+									url = normalizeUrl(url);
+									if (url) {
+										bgImages.push(url);
+									}
+									}
+								}
+							}
+						} catch (e) {
+							// Cross-origin stylesheet, skip
+						}
+					}
+					
+					// Also check inline styles
+					$('[style*="background-image"]').each(function() {
+						var style = $(this).attr('style') || '';
+						var match = style.match(/background-image:\s*url\(['"]?([^'")]+)['"]?\)/);
+						if (match && match[1]) {
+							var url = match[1];
+							url = normalizeUrl(url);
+							if (url) {
+								bgImages.push(url);
+							}
+						}
 					});
 					
-					// If no images to check, consider loaded
-					if (images.length === 0 && allImages.length === 0) {
+					return bgImages;
+				}
+				
+				// Function to collect all image URLs
+				function collectAllImageUrls() {
+					// Collect from img tags
+					$('img').each(function() {
+						var $img = $(this);
+						var src = $img.attr('src');
+						var dataSrc = $img.attr('data-src');
+						var srcset = $img.attr('srcset');
+						
+						if (src && !src.startsWith('data:')) {
+							imageUrls.add(normalizeUrl(src));
+						}
+						if (dataSrc && !dataSrc.startsWith('data:')) {
+							imageUrls.add(normalizeUrl(dataSrc));
+						}
+						if (srcset) {
+							var srcsetUrls = extractSrcsetUrls(srcset);
+							for (var i = 0; i < srcsetUrls.length; i++) {
+								if (!srcsetUrls[i].startsWith('data:')) {
+									imageUrls.add(normalizeUrl(srcsetUrls[i]));
+								}
+							}
+						}
+					});
+					
+					// Collect background images from CSS
+					var bgImages = extractBackgroundImages();
+					for (var i = 0; i < bgImages.length; i++) {
+						imageUrls.add(bgImages[i]);
+					}
+					
+					// Check computed styles only for elements with inline styles or specific classes
+					// This is more efficient than checking every element
+					$('[style*="background"], [class*="bg-"], [class*="background"], header, section, div[class*="section"]').each(function() {
+						try {
+							var bg = window.getComputedStyle(this).backgroundImage;
+							if (bg && bg !== 'none') {
+								var match = bg.match(/url\(['"]?([^'")]+)['"]?\)/);
+								if (match && match[1]) {
+									var url = match[1];
+									if (!url.startsWith('data:')) {
+										url = normalizeUrl(url);
+										if (url) {
+											imageUrls.add(url);
+										}
+									}
+								}
+							}
+						} catch (e) {
+							// Skip if error
+						}
+					});
+				}
+				
+				// Function to preload all images in parallel
+				function preloadAllImages() {
+					if (imageUrls.size === 0) {
 						imagesLoaded = true;
 						tryHidePreloader();
 						return;
 					}
 					
-					// If all images are lazy and below fold, just wait minimum time
-					if (images.length === 0 && allImages.length > 0) {
-						// Still wait for minimum time, but don't wait for images
-						setTimeout(function() {
-							imagesLoaded = true;
-							tryHidePreloader();
-						}, minDisplayTime);
-						return;
-					}
-					
-					var totalImages = images.length;
+					var totalImages = imageUrls.size;
 					var loadedImages = 0;
 					var failedImages = 0;
 					var checkComplete = false;
 					
-					images.each(function() {
-						var img = this;
-						
-						// Check if image is already loaded
-						if (img.complete && img.naturalHeight !== 0) {
-							loadedImages++;
-						} else if (img.complete && img.naturalHeight === 0) {
-							// Image failed to load
-							failedImages++;
-						} else {
-							// Wait for image to load
-							var imageHandler = function() {
+					// Convert Set to Array
+					var urlsArray = Array.from(imageUrls);
+					
+					// Note: We don't check cache here as it's unreliable
+					// Instead, we rely on the onload/onerror handlers and timeout
+					
+					// Preload all images in parallel
+					for (var i = 0; i < urlsArray.length; i++) {
+						(function(url) {
+							// Skip data URIs and invalid URLs
+							if (url.startsWith('data:') || !url) return;
+							
+							var img = new Image();
+							var imageTimeout;
+							var imageHandled = false;
+							
+							var handleImageComplete = function() {
+								if (imageHandled) return;
+								imageHandled = true;
+								
+								if (imageTimeout) {
+									clearTimeout(imageTimeout);
+								}
+								
 								if (!checkComplete) {
 									loadedImages++;
-									if (loadedImages + failedImages >= totalImages) {
-										checkComplete = true;
-										imagesLoaded = true;
-										tryHidePreloader();
-									}
+									checkProgress();
 								}
-								$(img).off('load error', imageHandler);
 							};
-							$(img).on('load error', imageHandler);
-						}
-					});
+							
+							var handleImageError = function() {
+								if (imageHandled) return;
+								imageHandled = true;
+								
+								if (imageTimeout) {
+									clearTimeout(imageTimeout);
+								}
+								
+								if (!checkComplete) {
+									failedImages++;
+									checkProgress();
+								}
+							};
+							
+							img.onload = handleImageComplete;
+							img.onerror = handleImageError;
+							
+							// Set timeout for each image (1.5s per image max)
+							imageTimeout = setTimeout(function() {
+								if (!img.complete && !imageHandled) {
+									handleImageError();
+								}
+							}, 1500);
+							
+							img.src = url;
+							
+							// Check if already loaded (cached)
+							if (img.complete) {
+								handleImageComplete();
+							}
+						})(urlsArray[i]);
+					}
 					
-					// If all images are already loaded or failed
-					if (loadedImages + failedImages >= totalImages && !checkComplete) {
-						checkComplete = true;
-						imagesLoaded = true;
-						tryHidePreloader();
+					// Function to check if all images are done
+					function checkProgress() {
+						if (checkComplete) return;
+						
+						if (loadedImages + failedImages >= totalImages) {
+							checkComplete = true;
+							imagesLoaded = true;
+							tryHidePreloader();
+						}
 					}
 				}
 				
-				// Function to try hiding preloader (only if conditions are met)
+				// Function to try hiding preloader
 				function tryHidePreloader() {
 					if (hideCalled) return;
 					
@@ -988,7 +1135,7 @@
 					if (hideCalled) return;
 					hideCalled = true;
 					
-					$preloader.fadeTo(400, 0, function() {
+					$preloader.fadeTo(300, 0, function() {
 						$(this).remove();
 					});
 					
@@ -1000,26 +1147,21 @@
 				// Wait for DOM to be ready
 				if (document.readyState === 'complete' || document.readyState === 'interactive') {
 					domReady = true;
-					// Small delay to ensure DOM is fully rendered (optimized from 100ms)
 					setTimeout(function() {
-						checkAllImagesLoaded();
-					}, 50);
+						collectAllImageUrls();
+						preloadAllImages();
+					}, 10);
 				} else {
 					$(document).on('DOMContentLoaded', function() {
 						domReady = true;
 						setTimeout(function() {
-							checkAllImagesLoaded();
-						}, 50);
+							collectAllImageUrls();
+							preloadAllImages();
+						}, 10);
 					});
 				}
 				
-				// Also check on window load (fallback)
-				$(window).on('load', function() {
-					domReady = true;
-					checkAllImagesLoaded();
-				});
-				
-				// Fallback: Force hide after max wait time (even if images not loaded)
+				// Fallback: Force hide after max wait time (2 seconds)
 				preloaderTimeout = setTimeout(function() {
 					if (!hideCalled) {
 						domReady = true;
