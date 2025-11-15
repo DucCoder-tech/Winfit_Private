@@ -971,26 +971,30 @@
 				
 				// Function to collect only critical (above-the-fold) image URLs
 				function collectCriticalImageUrls() {
-					// Collect from img tags - only above the fold
+					// Collect from img tags - only above the fold (reduced to 1x viewport for speed)
 					$('img').each(function() {
 						var $img = $(this);
 						var offset = $img.offset();
 						
 						// Skip lazy loaded images and images below fold
 						var isLazy = $img.attr('loading') === 'lazy' || $img.attr('data-src');
-						var isAboveFold = offset && offset.top < viewportHeight * 1.5; // 1.5x viewport for safety
+						// Reduced to 1x viewport (was 1.5x) - only truly visible images
+						var isAboveFold = offset && offset.top < viewportHeight;
 						
-						// Only include critical images
+						// Only include critical images that are visible
 						if (!isLazy && isAboveFold) {
 							var src = $img.attr('src');
 							if (src && !src.startsWith('data:')) {
-								criticalImageUrls.add(normalizeUrl(src));
+								// Limit to first 10 images max
+								if (criticalImageUrls.size < 10) {
+									criticalImageUrls.add(normalizeUrl(src));
+								}
 							}
 						}
 					});
 					
-					// Collect only critical background images (header, first section)
-					$('header, .site-header, section:first, .elementor-section:first').each(function() {
+					// Collect only critical background images (header only - most important)
+					$('header, .site-header').each(function() {
 						try {
 							var bg = window.getComputedStyle(this).backgroundImage;
 							if (bg && bg !== 'none') {
@@ -999,7 +1003,7 @@
 									var url = match[1];
 									if (!url.startsWith('data:')) {
 										url = normalizeUrl(url);
-										if (url) {
+										if (url && criticalImageUrls.size < 10) {
 											criticalImageUrls.add(url);
 										}
 									}
@@ -1010,13 +1014,20 @@
 						}
 					});
 					
-					// Add preloaded critical images from HTML
+					// Add preloaded critical images from HTML (these are highest priority)
 					$('link[rel="preload"][as="image"]').each(function() {
 						var href = $(this).attr('href');
 						if (href && !href.startsWith('data:')) {
-							criticalImageUrls.add(normalizeUrl(href));
+							// Preloaded images get priority - add them first
+							var normalizedUrl = normalizeUrl(href);
+							// Remove from set if exists, then add to front
+							criticalImageUrls.delete(normalizedUrl);
+							criticalImageUrls.add(normalizedUrl);
 						}
 					});
+					
+					// Debug: Log how many critical images found
+					console.log('Preloader: Found', criticalImageUrls.size, 'critical images');
 				}
 				
 				// Function to preload critical images in parallel (optimized for speed)
@@ -1031,10 +1042,14 @@
 					var loadedImages = 0;
 					var failedImages = 0;
 					var checkComplete = false;
-					var maxImagesToWait = Math.min(totalImages, 10); // Only wait for max 10 critical images
+					// Reduce to only 5 most critical images for faster loading
+					var maxImagesToWait = Math.min(totalImages, 5); // Only wait for max 5 critical images
 					
-					// Convert Set to Array
-					var urlsArray = Array.from(criticalImageUrls);
+					// Convert Set to Array and limit to first 5
+					var urlsArray = Array.from(criticalImageUrls).slice(0, 5);
+					
+					// Debug: Log how many images we're waiting for
+					console.log('Preloader: Waiting for', urlsArray.length, 'critical images out of', totalImages, 'total');
 					
 					// Preload critical images in parallel with aggressive timeout
 					for (var i = 0; i < urlsArray.length; i++) {
@@ -1077,12 +1092,12 @@
 							img.onload = handleImageComplete;
 							img.onerror = handleImageError;
 							
-							// Aggressive timeout: 500ms per image (much faster)
+							// Aggressive timeout: 300ms per image (very fast)
 							imageTimeout = setTimeout(function() {
 								if (!img.complete && !imageHandled) {
 									handleImageError();
 								}
-							}, 500);
+							}, 300);
 							
 							img.src = url;
 							
@@ -1110,9 +1125,10 @@
 						if (!checkComplete) {
 							checkComplete = true;
 							imagesLoaded = true;
+							console.log('Preloader: Force proceeding after timeout. Loaded:', loadedImages, 'Failed:', failedImages);
 							tryHidePreloader();
 						}
-					}, 800); // Force proceed after 800ms
+					}, 600); // Force proceed after 600ms (reduced from 800ms)
 				}
 				
 				// Function to try hiding preloader
