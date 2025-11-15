@@ -883,8 +883,8 @@
 			if ($('.page-preloader-cover')[0]) {
 				var $preloader = $('.page-preloader-cover');
 				var preloaderTimeout;
-				var minDisplayTime = 3000; // Minimum 3 seconds display time
-				var maxWaitTime = 8000; // Maximum 8 seconds wait time (fallback)
+				var minDisplayTime = 1000; // Minimum 1 second display time (optimized from 3s)
+				var maxWaitTime = 4000; // Maximum 4 seconds wait time (fallback, optimized from 8s)
 				var startTime = Date.now();
 				var imagesLoaded = false;
 				var domReady = false;
@@ -892,14 +892,16 @@
 				
 				// Function to check if all images are loaded
 				function checkAllImagesLoaded() {
-					// Get all images, but prioritize above-the-fold images
+					// Get all images, but prioritize above-the-fold images only
 					var allImages = $('img');
+					var viewportHeight = window.innerHeight;
 					var images = allImages.filter(function() {
 						var $img = $(this);
-						// Include images that are not lazy loaded or are above the fold
+						// Include images that are not lazy loaded or are above the fold (first viewport only)
 						var isLazy = $img.attr('loading') === 'lazy' || $img.attr('data-src');
 						var offset = $img.offset();
-						var isAboveFold = offset && offset.top < window.innerHeight * 2;
+						// Only check images in first viewport (optimized from 2x viewport)
+						var isAboveFold = offset && offset.top < viewportHeight;
 						
 						// Include if not lazy or if above fold
 						return !isLazy || isAboveFold;
@@ -998,16 +1000,16 @@
 				// Wait for DOM to be ready
 				if (document.readyState === 'complete' || document.readyState === 'interactive') {
 					domReady = true;
-					// Small delay to ensure DOM is fully rendered
+					// Small delay to ensure DOM is fully rendered (optimized from 100ms)
 					setTimeout(function() {
 						checkAllImagesLoaded();
-					}, 100);
+					}, 50);
 				} else {
 					$(document).on('DOMContentLoaded', function() {
 						domReady = true;
 						setTimeout(function() {
 							checkAllImagesLoaded();
-						}, 100);
+						}, 50);
 					});
 				}
 				
